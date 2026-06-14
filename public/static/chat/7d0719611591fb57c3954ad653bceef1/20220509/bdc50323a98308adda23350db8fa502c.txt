@@ -1,0 +1,95 @@
+逆风科技 IM带音视频支付红包即时通讯源码 搭建教程
+
+<服务器环境配置>
+
+   1.服务器安全组开放28018 8383 1236端口，如使用宝塔面板请记得在安全-防火墙中也要开启对应端口。
+
+   2.安装Nginx 1.18.0，MySQL 5.6.50，php7.0和php7.3(php版本必须使用这两个，其他软件版本可以使用最新版本)，MongoDB 4.4.6，Redis 6.2.5。
+    
+   3.php安装扩展fileinfo，redis，Swoole4，mongodb，删除所有禁用函数(php7.0和php7.3均需按此修改)，修改mongodb 端口为28018。
+
+   4.重载php和mongodb配置，或者直接重启。
+
+<源码搭建>
+
+   1.准备两个域名  imadmin.xxx.xxx(系统后台和app端服务使用)  imchat.xxx.xxx(web端服务使用)。
+   
+   2./www/wwwroot目录下新建im文件夹，上传服务端nf_uniapp_im_server中的源码文件到im文件夹中并解压。
+
+   3./www/wwwroot目录下新建mongodb文件夹，上传mongodb数据库压缩包并解压。上传mysql数据库并在宝塔导入。
+
+   4.站点目录设置，伪静态设置。
+       
+     这个域名 imchat.xxx.xxx 的目录设置为/www/wwwroot/im/http/public/h5，运行目录为 /,去掉防跨站，默认文档index.php
+和index.html位置调换，就是把index.php放在第一位，php版本选7.3(重要)，伪静态选thinkphp
+
+ 这个域名 imadmin.xxx.xxx 的目录设置为/www/wwwroot/im/http，运行目录为 /public, 去掉防跨站，默认文档index.php
+和index.html位置调换，就是把index.php放在第一位，php版本选7.0(重要)，伪静态选thinkphp
+
+
+   5.修改文件配置
+       /www/wwwroot/im/http/app/im/common/controller/ActionBegin1.php  修改GatwayWork服务地址
+       /www/wwwroot/im/http/config/database.php 修改数据库信息
+       /www/wwwroot/im/socket/app/im/common/controller/Main.php 修改数据库信息
+       /www/wwwroot/im/socket/app/im/common/controller/Config.php 修改IP
+
+   6.mongodb安装
+      进入服务器终端，执行以下命令：
+      cd /www/server
+      cd mongodb
+      cd bin
+      ./mongorestore -h 127.0.0.1:28018 -d im -dir /www/wwwroot/mongodb/im  (数据存放目录)
+
+  注意：6，7步如果压缩包链接失效，请直接上传源码中的对应压缩包，并自行选取下面的部分命令执行。
+     6.ffmpeg安装
+       进入服务器终端，执行以下命令（如果上一步执行后不会回退命令的，直接重新打开终端）：
+       wget http://smiaoshen.oss-cn-hangzhou.aliyuncs.com/im/ffmeg.zip
+       mv ffmeg.zip /opt
+       cd /opt
+       unzip ffmeg.zip
+      
+    7.安装yasm
+       进入服务器终端，执行以下命令
+       wget http://www.tortall.net/projects/yasm/releases/yasm-1.3.0.tar.gz
+       tar -zxvf yasm-1.3.0.tar.gz
+       cd yasm-1.3.0
+       ./configure make && make install
+       ./configure && make && make install
+       cd ../
+       cd /opt
+       cd ffmpeg
+       ./configure && make && make install
+
+<启动服务>(使用宝塔终端启动服务时php版本选择7.0，ln -sf /www/server/php/70/bin/php /usr/bin/php这条命令可以修改宝塔终端的默认php版本)
+
+         进入服务器终端，执行以下命令
+         cd
+         cd /www/wwwroot/im/socket
+         下面两个命令二选 一
+         php start.php start (此命终端退出后服务自动停止，适用于调试时使用)
+         nohup php /www/wwwroot/im/socket/start.php start >/dev/null 2>&1 &（该命令在系统注册，服务可以保活，即时终端退出服务仍然运行，适用于正式使用场景）
+
+         打开imadmin.xxx.xxx:8383，出现  Websocket powerd by workerman 3.5.20 服务端就搭建完成了。
+
+         后台地址 http://imadmin.xxx.xxx/admin_login  账户admin  密码123456
+
+<前端搭建开始>
+
+使用HBuilder X导入前端源码
+
+修改App.vue文件的这三处配置（如下）
+
+          http_url: 'http://imadmin.zjyappupdate.xyz',     //对应上面说的系统后台和app端服务使用域名地址
+	
+          static_url: 'http://imadmin.zjyappupdate.xyz',    //对应上面说的系统后台和app端服务使用域名地址
+
+           socket_url: 'ws://154.212.161.86:8383',      //修改154.212.161.86为自己的服务器地址，端口不需要改动
+
+
+开始打包：
+
+web端使用HBuilder的发行功能打包，然后上传服务器/www/wwwroot/im/http/public/h5目录，记得删除原来的文件和文件夹。
+app端直接运行到手机或打包（参照HBuilder官网打包教程）。
+
+注意：最新版本已接入音视频和在线热更新功能，如果您对uniapp不熟悉，请联系QQ：1928400264指导配置，否则无法打包成功。
+

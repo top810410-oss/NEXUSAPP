@@ -1,0 +1,5 @@
+启动服务
+cd
+cd /www/wwwroot/im/socket
+php start.php start   
+nohup php /www/wwwroot/im/socket/start.php start >/dev/null 2>&1 &

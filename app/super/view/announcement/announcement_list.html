@@ -1,0 +1,71 @@
+{extend name="/common/page_container" /}
+{block name="head_top"}
+{/block}
+{block name="content"}
+<style>
+    .laytable-cell-1-0-10 {
+        width: 10px;
+    }
+</style>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15"  id="app">
+<div class="layui-col-md12">
+    
+<div class="layui-row layui-col-space15" >
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header">公告列表</div>
+            <div class="layui-card-body">
+                <div class="layui-btn-container">
+                   <a type="button" class="layui-btn layui-btn-sm layui-btn-normal" href="{:Url('/super_addAnnouncement')}">添加公告</a>
+                </div>
+                <table class="layui-hide" id="List" lay-filter="List"></table>
+                <script type="text/html" id="act">
+                    <button type="button" class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</button>
+                 </script>
+                <script type="text/html" id="status">
+                    {{#  if(d.status == 1){ }}
+                    <span>已上架</span>
+                    {{# }else{ }}
+                    <span style="color: red;">已下架</span>
+                    {{#  } }}
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+<script src="{__ADMIN_PATH}js/layuiList.js"></script>
+{/block}
+
+{block name="script"}
+<script>
+    layList.form.render();
+    layList.tableList('List',"{:Url('/super_announcementList')}",function (){
+        return [
+            {field:'id', width:'13%', title: '序号', sort: true,align:'center'},
+            {field:'article_name',  title: '公告名称',align:'center'},
+            {field:'article_desc', title: '公告描述',align:'center',sort: true},
+            {field:'status', title: '公告状态',align:'center',sort: true,templet:"#status"},
+            {field:'position', title: '展示位置',align:'center'},
+            {field:'sort', title: '排序',align:'center'},
+            {field:'create_time', title: '上架时间',align:'center'},
+            {field:'right', title: '操作',align:'center',toolbar:'#act'},
+        ];
+    });
+    layList.search('search',function(where){
+        layList.reload(where,true);
+    });
+
+    layList.tool(function (event,data,obj) {
+        switch (event) {
+            case 'edit':
+                var url = "{:Url('/super_addAnnouncement')}"+'?id='+data.id;
+                location.href = url+"&time="+(new Date()).getTime()
+                // layList.createModalFrame('编辑',url+'?id='+data.id)
+                break;
+        }
+    })
+</script>
+{/block}
